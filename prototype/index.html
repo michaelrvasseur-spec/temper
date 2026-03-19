@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temper — Raw ideas. Refined priorities.</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #FAF7F4; color: #1E1E1E; }
+
+    /* Prototype banner */
+    .proto-banner { background: #1E1E1E; color: #FAF7F4; font-size: 12px; text-align: center; padding: 8px 16px; line-height: 1.5; }
+    .proto-banner a { color: #E8B48A; text-decoration: none; }
+    .proto-banner a:hover { text-decoration: underline; }
+
+    /* Layout */
+    .min-h-screen { min-height: 100vh; }
+    .max-w-3xl { max-width: 48rem; margin: 0 auto; }
+
+    /* Header */
+    header { background: #FAF7F4; border-bottom: 1px solid #E5DDD5; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 8px; }
+    .logo-mark { width: 28px; height: 28px; border-radius: 6px; background: #C4733A; display: flex; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: 700; }
+    .logo-name { font-weight: 600; color: #1E1E1E; font-size: 14px; }
+    .logo-tagline { font-size: 10px; color: #9E8E88; font-weight: 400; margin-top: 1px; }
+    .steps { display: flex; align-items: center; gap: 24px; }
+    .step { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; background: none; }
+    .step.active { color: #C4733A; }
+    .step.done { color: #9E8E88; }
+    .step.locked { color: #C8BEBE; cursor: default; }
+    .step-num { width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .step.active .step-num { background: #C4733A; color: white; }
+    .step.done .step-num { background: #E5DDD5; color: #6B5E5A; }
+    .step.locked .step-num { border: 1px solid #C8BEBE; color: #9E8E88; }
+
+    /* Main */
+    main { padding: 40px 16px; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* Typography */
+    h1 { font-size: 24px; font-weight: 700; color: #1E1E1E; margin-bottom: 4px; }
+    .subtitle { font-size: 14px; color: #6B5E5A; margin-bottom: 24px; }
+
+    /* Cards */
+    .card { background: white; border: 1px solid #E5DDD5; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+
+    /* Form elements */
+    label { font-size: 11px; font-weight: 600; color: #6B5E5A; text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 4px; }
+    .hint { font-size: 11px; color: #9E8E88; margin-top: 2px; margin-bottom: 6px; }
+    input, textarea { width: 100%; border: 1px solid #E5DDD5; border-radius: 8px; padding: 8px 12px; font-size: 14px; color: #1E1E1E; font-family: inherit; outline: none; transition: box-shadow .15s; }
+    input:focus, textarea:focus { box-shadow: 0 0 0 2px #E8B48A; border-color: #E8B48A; }
+    textarea { resize: none; font-family: 'Courier New', monospace; font-size: 13px; }
+    .form-group { margin-bottom: 16px; }
+
+    /* Buttons */
+    .btn-primary { width: 100%; background: #C4733A; color: white; border: none; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; }
+    .btn-primary:hover { background: #A85E2A; }
+    .btn-primary:disabled { background: #E5DDD5; color: #9E8E88; cursor: not-allowed; }
+    .btn-outline { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9E8E88; border: 1px solid #E5DDD5; border-radius: 8px; padding: 7px 12px; background: white; cursor: pointer; }
+    .btn-row { display: flex; gap: 10px; margin-bottom: 20px; }
+
+    /* Footnote */
+    .footnote { font-size: 11px; color: #9E8E88; text-align: center; margin-top: 12px; }
+
+    /* Badge */
+    .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 9999px; margin-bottom: 6px; }
+    .badge-amber { background: #fef3c7; color: #b45309; }
+    .badge-indigo { background: #FDF4EC; color: #A85E2A; }
+
+    /* MaxDiff card */
+    .maxdiff-header { background: #FAF7F4; border-bottom: 1px solid #E5DDD5; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #6B5E5A; }
+    .dots { display: flex; gap: 4px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: #E5DDD5; }
+    .dot.filled { background: #C4733A; }
+    .maxdiff-body { padding: 24px 20px; }
+    .maxdiff-prompt { font-size: 14px; font-weight: 500; color: #1E1E1E; text-align: center; margin-bottom: 16px; }
+    .most { color: #16a34a; font-weight: 600; }
+    .least { color: #ef4444; font-weight: 600; }
+    .option-row { border: 2px solid #E5DDD5; border-radius: 8px; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; transition: border-color .15s, background .15s; }
+    .option-row:hover { border-color: #C8BEBE; }
+    .option-row.is-best { border-color: #4ade80; background: #f0fdf4; }
+    .option-row.is-worst { border-color: #fca5a5; background: #fef2f2; }
+    .option-label { font-size: 14px; font-weight: 500; color: #1E1E1E; }
+    .option-row.is-best .option-label { color: #15803d; }
+    .option-row.is-worst .option-label { color: #dc2626; }
+    .option-btns { display: flex; gap: 8px; }
+    .opt-btn { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 6px; border: 1px solid #E5DDD5; background: white; color: #6B5E5A; cursor: pointer; transition: all .15s; }
+    .opt-btn:hover.most-btn { border-color: #4ade80; color: #16a34a; }
+    .opt-btn:hover.least-btn { border-color: #fca5a5; color: #ef4444; }
+    .opt-btn.selected-most { background: #22c55e; color: white; border-color: #22c55e; }
+    .opt-btn.selected-least { background: #f87171; color: white; border-color: #f87171; }
+    .info-bar { background: #FDF4EC; border: 1px solid #F5DEC8; border-radius: 12px; padding: 10px 16px; font-size: 12px; color: #A85E2A; margin-top: 16px; }
+    .info-bar strong { font-weight: 600; }
+
+    /* Results */
+    .results-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+    .results-meta { font-size: 14px; color: #6B5E5A; margin-top: 4px; }
+    .btn-sm { font-size: 12px; background: white; border: 1px solid #E5DDD5; color: #4A3F3C; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-weight: 500; }
+    .rec-card { background: #C4733A; color: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(196,115,58,.25); }
+    .rec-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #E8B48A; margin-bottom: 4px; }
+    .rec-text { font-size: 15px; font-weight: 600; line-height: 1.4; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 4px; background: #F0EAE4; border-radius: 8px; padding: 4px; width: fit-content; margin-bottom: 16px; }
+    .tab { font-size: 12px; font-weight: 500; padding: 6px 12px; border-radius: 6px; border: none; background: none; color: #6B5E5A; cursor: pointer; transition: all .15s; }
+    .tab.active { background: white; color: #1E1E1E; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+
+    /* Priority list */
+    .list-card { background: white; border: 1px solid #E5DDD5; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    .list-subheader { padding: 12px 20px; border-bottom: 1px solid #F0EAE4; font-size: 12px; color: #6B5E5A; }
+    .list-row { padding: 10px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #FAF7F4; transition: background .1s; }
+    .list-row:last-child { border-bottom: none; }
+    .list-row:hover { background: #FAF7F4; }
+    .rank { font-size: 11px; font-weight: 700; color: #9E8E88; width: 16px; text-align: right; }
+    .feat-name { font-size: 14px; font-weight: 500; color: #1E1E1E; width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-wrap { flex: 1; display: flex; align-items: center; gap: 8px; }
+    .bar-bg { flex: 1; background: #F0EAE4; border-radius: 9999px; height: 8px; }
+    .bar-fill { height: 8px; border-radius: 9999px; }
+    .bar-high { background: #C4733A; }
+    .bar-mid { background: #E8B48A; }
+    .bar-low { background: #C8BEBE; }
+    .score { font-size: 12px; font-weight: 600; color: #4A3F3C; width: 24px; text-align: right; }
+    .seg-pill { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 9999px; white-space: nowrap; }
+    .seg-Enterprise { background: #FEF3E8; color: #A85E2A; }
+    .seg-Technical { background: #dbeafe; color: #1d4ed8; }
+    .seg-SMB { background: #d1fae5; color: #065f46; }
+    .seg-All { background: #F0EAE4; color: #4A3F3C; }
+
+    /* WTP list */
+    .wtp-row { padding: 10px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #FAF7F4; }
+    .wtp-row:last-child { border-bottom: none; }
+    .wtp-name { font-size: 14px; font-weight: 500; color: #1E1E1E; flex: 1; }
+    .wtp-bar-bg { width: 120px; background: #F0EAE4; border-radius: 9999px; height: 8px; }
+    .wtp-bar-fill { height: 8px; border-radius: 9999px; background: #34d399; }
+    .wtp-price { font-size: 14px; font-weight: 700; color: #059669; width: 56px; text-align: right; }
+    .list-footer { padding: 10px 20px; background: #FAF7F4; border-top: 1px solid #F0EAE4; font-size: 11px; color: #9E8E88; }
+
+    /* Segment cards */
+    .seg-card { background: white; border: 1px solid #E5DDD5; border-radius: 12px; padding: 16px; margin-bottom: 10px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+    .seg-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #1E1E1E; margin-bottom: 4px; }
+    .seg-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .seg-note { font-size: 12px; color: #6B5E5A; margin-bottom: 10px; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { font-size: 12px; font-weight: 500; background: #F0EAE4; color: #4A3F3C; padding: 4px 10px; border-radius: 9999px; }
+
+    /* Gabor-Granger WTP screen */
+    .gg-feature-label { font-size: 11px; font-weight: 600; color: #6B5E5A; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+    .gg-feature-name { font-size: 18px; font-weight: 700; color: #1E1E1E; margin-bottom: 20px; }
+    .gg-price-display { text-align: center; margin: 28px 0; }
+    .gg-price-amount { font-size: 52px; font-weight: 800; color: #1E1E1E; line-height: 1; }
+    .gg-price-period { font-size: 16px; color: #9E8E88; font-weight: 500; margin-top: 4px; }
+    .gg-price-context { font-size: 12px; color: #9E8E88; margin-top: 8px; }
+    .gg-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+    .gg-btn-yes { background: #f0fdf4; border: 2px solid #bbf7d0; color: #15803d; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all .15s; }
+    .gg-btn-yes:hover { background: #dcfce7; border-color: #4ade80; }
+    .gg-btn-no { background: #fff1f2; border: 2px solid #fecdd3; color: #be123c; border-radius: 12px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all .15s; }
+    .gg-btn-no:hover { background: #ffe4e6; border-color: #fda4af; }
+    .gg-progress { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .gg-progress-bar { flex: 1; height: 4px; background: #F0EAE4; border-radius: 9999px; }
+    .gg-progress-fill { height: 4px; background: #C4733A; border-radius: 9999px; transition: width .3s; }
+    .gg-progress-label { font-size: 11px; color: #9E8E88; white-space: nowrap; }
+    .gg-ladder { display: flex; gap: 4px; justify-content: center; margin: 16px 0 8px; }
+    .gg-rung { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #E5DDD5; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #9E8E88; transition: all .2s; }
+    .gg-rung.answered-yes { background: #dcfce7; border-color: #4ade80; color: #15803d; }
+    .gg-rung.answered-no { background: #ffe4e6; border-color: #fda4af; color: #be123c; }
+    .gg-rung.current { border-color: #C4733A; color: #C4733A; background: #FDF4EC; }
+    .gg-transition { text-align: center; padding: 32px 0; }
+    .gg-transition-icon { font-size: 32px; margin-bottom: 12px; }
+    .gg-transition-title { font-size: 16px; font-weight: 700; color: #1E1E1E; margin-bottom: 6px; }
+    .gg-transition-sub { font-size: 13px; color: #6B5E5A; margin-bottom: 20px; }
+
+    /* Outcome selector */
+    .outcome-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+    .outcome-tile { border: 2px solid #E5DDD5; border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all .15s; background: white; text-align: left; position: relative; }
+    .outcome-tile:hover { border-color: #E8B48A; background: #FDF8F5; }
+    .outcome-tile.selected { border-color: #C4733A; background: #FDF4EC; }
+    .outcome-tile-icon { font-size: 18px; margin-bottom: 6px; display: block; }
+    .outcome-tile-label { font-size: 13px; font-weight: 600; color: #1E1E1E; display: block; margin-bottom: 2px; }
+    .outcome-tile-desc { font-size: 11px; color: #9E8E88; line-height: 1.4; display: block; }
+    .outcome-tile.selected .outcome-tile-label { color: #A85E2A; }
+    .outcome-tile.selected .outcome-tile-desc { color: #D08050; }
+    .outcome-check { position: absolute; top: 10px; right: 10px; width: 16px; height: 16px; border-radius: 50%; background: #C4733A; display: flex; align-items: center; justify-content: center; }
+    .outcome-check svg { width: 9px; height: 9px; stroke: white; stroke-width: 3; fill: none; }
+
+    /* Audience selector */
+    .audience-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+    .audience-tile { border: 2px solid #E5DDD5; border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all .15s; background: white; display: flex; align-items: center; gap: 10px; }
+    .audience-tile:hover { border-color: #E8B48A; background: #FDF8F5; }
+    .audience-tile.selected { border-color: #C4733A; background: #FDF4EC; }
+    .audience-icon { font-size: 22px; }
+    .audience-label { font-size: 13px; font-weight: 600; color: #1E1E1E; }
+    .audience-sub { font-size: 11px; color: #9E8E88; margin-top: 1px; }
+    .audience-tile.selected .audience-label { color: #A85E2A; }
+
+    /* Summary chips on preview screen */
+    .config-summary { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+    .config-chip { font-size: 11px; font-weight: 500; background: #FDF4EC; color: #A85E2A; border: 1px solid #F5DEC8; padding: 3px 10px; border-radius: 9999px; }
+
+    /* LLM cleanup button */
+    .llm-bar { display: flex; align-items: center; justify-content: space-between; background: #FAF7F4; border: 1px solid #E5DDD5; border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+    .llm-bar-left { display: flex; flex-direction: column; gap: 2px; }
+    .llm-bar-title { font-size: 13px; font-weight: 600; color: #1E1E1E; }
+    .llm-bar-desc { font-size: 11px; color: #6B5E5A; }
+    .btn-llm { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; background: #C4733A; color: white; border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer; transition: background .15s; white-space: nowrap; }
+    .btn-llm:hover { background: #A85E2A; }
+    .btn-llm:disabled { background: #E8B48A; cursor: not-allowed; }
+    .btn-llm-done { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+    .spinner { width: 12px; height: 12px; border: 2px solid rgba(255,255,255,.4); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .textarea-cleaned { border-color: #bbf7d0 !important; background: #f0fdf4 !important; }
+
+    /* Tested-language tooltip */
+    .feat-tested { position: relative; display: inline-flex; align-items: center; gap: 3px; cursor: default; overflow: visible !important; }
+    .feat-tested-icon { font-size: 9px; color: #C4733A; flex-shrink: 0; line-height: 1; }
+    .feat-tested-tip {
+      display: none; position: absolute; bottom: calc(100% + 8px); left: 0;
+      background: #1E1E1E; color: white; padding: 8px 12px; border-radius: 8px;
+      font-size: 11px; line-height: 1.5; width: 230px; z-index: 200;
+      font-weight: 400; white-space: normal; box-shadow: 0 4px 16px rgba(0,0,0,.25);
+      pointer-events: none;
+    }
+    .feat-tested-tip strong { display: block; font-size: 10px; font-weight: 700; color: #9E8E88; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+    .feat-tested-tip::after { content: ''; position: absolute; top: 100%; left: 14px; border: 5px solid transparent; border-top-color: #1E1E1E; }
+    .feat-tested:hover .feat-tested-tip { display: block; }
+    .list-card { overflow: visible !important; }
+    .list-card > *:first-child { border-top-left-radius: 11px; border-top-right-radius: 11px; }
+    .list-card > *:last-child { border-bottom-left-radius: 11px; border-bottom-right-radius: 11px; }
+
+    /* Spacing helpers */
+    .mb4 { margin-bottom: 4px; }
+    .mb8 { margin-bottom: 8px; }
+    .mb16 { margin-bottom: 16px; }
+    .mb20 { margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+<div class="proto-banner">
+  This is a prototype — not a real product. Interactions are simulated for research purposes.
+  Questions or feedback? <a href="mailto:michael.r.vasseur@gmail.com">michael.r.vasseur@gmail.com</a>
+</div>
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+
+const sampleFeatures = [
+  "Single sign-on (SSO)",
+  "Custom dashboards",
+  "Slack integration",
+  "Audit logs",
+  "Mobile app",
+  "Advanced permissions",
+  "API access",
+  "Bulk data export",
+  "Workflow automation",
+  "White-labeling",
+];
+
+const resultsData = [
+  { name: "Single sign-on (SSO)", score: 94, wtp: 28, segment: "Enterprise" },
+  { name: "API access", score: 81, wtp: 22, segment: "Technical" },
+  { name: "Workflow automation", score: 76, wtp: 19, segment: "All" },
+  { name: "Advanced permissions", score: 68, wtp: 14, segment: "Enterprise" },
+  { name: "Slack integration", score: 61, wtp: 11, segment: "SMB" },
+  { name: "Audit logs", score: 54, wtp: 10, segment: "Enterprise" },
+  { name: "Custom dashboards", score: 47, wtp: 9, segment: "All" },
+  { name: "Bulk data export", score: 38, wtp: 6, segment: "Technical" },
+  { name: "Mobile app", score: 29, wtp: 4, segment: "SMB" },
+  { name: "White-labeling", score: 18, wtp: 3, segment: "Enterprise" },
+];
+
+const maxDiffSets = [
+  ["Single sign-on (SSO)", "Slack integration", "Custom dashboards", "Audit logs"],
+  ["API access", "Mobile app", "Workflow automation", "White-labeling"],
+  ["Advanced permissions", "Bulk data export", "Single sign-on (SSO)", "Slack integration"],
+];
+
+// Builds balanced MaxDiff sets from any feature list
+const buildMaxDiffSets = (feats, setSize = 4) => {
+  const n = feats.length;
+  if (n <= setSize) return [feats.slice(0, setSize)];
+  const numSets = Math.max(3, Math.ceil((n * 1.5) / setSize));
+  const sets = [];
+  // Step through with a stride so each feature appears roughly equally
+  const stride = Math.ceil(n / setSize);
+  for (let i = 0; i < numSets; i++) {
+    const seen = new Set();
+    const set = [];
+    for (let j = 0; j < n && set.length < setSize; j++) {
+      const idx = (i * stride + j) % n;
+      if (!seen.has(idx)) { seen.add(idx); set.push(feats[idx]); }
+    }
+    sets.push(set);
+  }
+  return sets;
+};
+
+// Per-outcome ranked results data
+const OUTCOME_DATA = {
+  priority: [
+    { name: "Single sign-on (SSO)", score: 94, segment: "Enterprise" },
+    { name: "API access", score: 81, segment: "Technical" },
+    { name: "Workflow automation", score: 76, segment: "All" },
+    { name: "Advanced permissions", score: 68, segment: "Enterprise" },
+    { name: "Slack integration", score: 61, segment: "SMB" },
+    { name: "Audit logs", score: 54, segment: "Enterprise" },
+    { name: "Custom dashboards", score: 47, segment: "All" },
+    { name: "Bulk data export", score: 38, segment: "Technical" },
+    { name: "Mobile app", score: 29, segment: "SMB" },
+    { name: "White-labeling", score: 18, segment: "Enterprise" },
+  ],
+  churn: [
+    { name: "Single sign-on (SSO)", score: 91, segment: "Enterprise" },
+    { name: "API access", score: 84, segment: "Technical" },
+    { name: "Advanced permissions", score: 72, segment: "Enterprise" },
+    { name: "Workflow automation", score: 65, segment: "All" },
+    { name: "Audit logs", score: 60, segment: "Enterprise" },
+    { name: "Slack integration", score: 44, segment: "SMB" },
+    { name: "Bulk data export", score: 39, segment: "Technical" },
+    { name: "Custom dashboards", score: 31, segment: "All" },
+    { name: "Mobile app", score: 22, segment: "SMB" },
+    { name: "White-labeling", score: 11, segment: "Enterprise" },
+  ],
+  upgrade: [
+    { name: "Workflow automation", score: 88, segment: "All" },
+    { name: "Single sign-on (SSO)", score: 82, segment: "Enterprise" },
+    { name: "API access", score: 74, segment: "Technical" },
+    { name: "Custom dashboards", score: 63, segment: "All" },
+    { name: "Advanced permissions", score: 55, segment: "Enterprise" },
+    { name: "Slack integration", score: 48, segment: "SMB" },
+    { name: "Mobile app", score: 37, segment: "SMB" },
+    { name: "White-labeling", score: 30, segment: "Enterprise" },
+    { name: "Bulk data export", score: 24, segment: "Technical" },
+    { name: "Audit logs", score: 16, segment: "Enterprise" },
+  ],
+  compete: [
+    { name: "API access", score: 90, segment: "Technical" },
+    { name: "Workflow automation", score: 79, segment: "All" },
+    { name: "Single sign-on (SSO)", score: 71, segment: "Enterprise" },
+    { name: "Slack integration", score: 62, segment: "SMB" },
+    { name: "Custom dashboards", score: 53, segment: "All" },
+    { name: "Advanced permissions", score: 45, segment: "Enterprise" },
+    { name: "Mobile app", score: 40, segment: "SMB" },
+    { name: "Bulk data export", score: 33, segment: "Technical" },
+    { name: "Audit logs", score: 25, segment: "Enterprise" },
+    { name: "White-labeling", score: 14, segment: "Enterprise" },
+  ],
+  adoption: [
+    { name: "Slack integration", score: 89, segment: "SMB" },
+    { name: "Workflow automation", score: 83, segment: "All" },
+    { name: "Custom dashboards", score: 70, segment: "All" },
+    { name: "Mobile app", score: 64, segment: "SMB" },
+    { name: "API access", score: 57, segment: "Technical" },
+    { name: "Single sign-on (SSO)", score: 46, segment: "Enterprise" },
+    { name: "Bulk data export", score: 38, segment: "Technical" },
+    { name: "Advanced permissions", score: 29, segment: "Enterprise" },
+    { name: "Audit logs", score: 20, segment: "Enterprise" },
+    { name: "White-labeling", score: 12, segment: "Enterprise" },
+  ],
+};
+
+// Score label per outcome
+const OUTCOME_SCORE_LABEL = {
+  priority: "Preference score — higher means customers value it more",
+  churn:    "Churn risk score — higher means more customers would cancel without it",
+  upgrade:  "Upgrade driver score — higher means more likely to trigger a plan upgrade",
+  compete:  "Competitive defense score — higher means stronger moat against rivals",
+  adoption: "Predicted daily usage score — higher means more frequent real-world use",
+};
+
+// Bar color per outcome
+const OUTCOME_BAR_COLOR = {
+  priority: { high: "#C4733A", mid: "#E8B48A", low: "#C8BEBE" },
+  churn:    { high: "#ef4444", mid: "#fca5a5", low: "#E5DDD5" },
+  upgrade:  { high: "#10b981", mid: "#6ee7b7", low: "#d1fae5" },
+  compete:  { high: "#f59e0b", mid: "#fcd34d", low: "#fef3c7" },
+  adoption: { high: "#3b82f6", mid: "#93c5fd", low: "#dbeafe" },
+};
+
+// Recommendation text keyed by active tab
+const makeRec = (activeTab, audience) => {
+  const aud = audience === "consumer" ? "users" : "customers";
+  const Aud = aud.charAt(0).toUpperCase() + aud.slice(1);
+  const recs = {
+    priority: `Build SSO before Custom Dashboards. ${Aud} value it 2× more — it should be your next sprint.`,
+    churn:    `SSO and API access are table stakes — 68% of enterprise ${aud} say they'd cancel without them. Treat these as must-haves, not differentiators.`,
+    compete:  `API access is your most defensible feature. ${Aud} say it would keep them from switching even if a rival offered lower prices.`,
+    adoption: `Slack integration and Workflow automation will drive the most daily active usage. Prioritise these to improve engagement and reduce churn.`,
+    map:      `SSO and API access lead across every dimension measured — they're your clearest build priorities. Workflow automation forms a strong second tier, scoring high on both adoption and competitive defense.`,
+  };
+  return recs[activeTab] || recs.priority;
+};
+
+// Outcome options — each adds ~2 min per respondent and ~12 additional responses needed
+const OUTCOMES = [
+  { id: "priority", icon: "🏆", label: "Feature value",        desc: "Which features do customers value most overall?",              time: 2, cost: 65 },
+  { id: "churn",    icon: "↩️", label: "Churn risk",           desc: "Which features would customers cancel over if removed?",       time: 2, cost: 65 },
+  { id: "compete",  icon: "⚔️", label: "Competitive defense",  desc: "Which features prevent customers from switching to a rival?",  time: 2, cost: 65 },
+  { id: "adoption", icon: "📈", label: "Adoption likelihood",  desc: "Which features will customers use most in day-to-day work?",   time: 2, cost: 65 },
+];
+
+// MaxDiff question stems by outcome
+const OUTCOME_STEMS = {
+  churn:    { most: "most likely to cause you to cancel if removed", least: "least likely to cause you to cancel if removed" },
+  upgrade:  { most: "most likely to motivate you to upgrade to a higher plan", least: "least likely to motivate you to upgrade" },
+  priority: { most: "most valuable to you", least: "least valuable to you" },
+  compete:  { most: "most likely to keep you from switching to a competitor", least: "least likely to matter when comparing alternatives" },
+  adoption: { most: "most likely to use regularly in your day-to-day work", least: "least likely to use regularly" },
+  pricing:  { most: "most worth paying extra for", least: "least worth paying extra for" },
+};
+
+// Audience config
+const AUDIENCES = [
+  { id: "consumer", icon: "👤", label: "Consumers",      sub: "Individual users, B2C" },
+  { id: "business", icon: "🏢", label: "Businesses",     sub: "Teams and companies, B2B" },
+];
+
+// Mock LLM cleanup — rewrites jargon into customer-friendly language, normalised length
+const LLM_CLEANUP_MAP = {
+  "Single sign-on (SSO)":   "Log in once and access all your tools without re-entering your password",
+  "Custom dashboards":       "Build your own views to track the metrics that matter to your team",
+  "Slack integration":       "Receive updates and alerts directly inside your Slack workspace",
+  "Audit logs":              "See a full, searchable history of every action taken in your account",
+  "Mobile app":              "Access and manage everything from your phone or tablet on the go",
+  "Advanced permissions":    "Control exactly what each team member can view, edit, or manage",
+  "API access":              "Connect the product to your other tools using our developer API",
+  "Bulk data export":        "Download all of your data at any time in a format you can use",
+  "Workflow automation":     "Set up rules to automatically handle repetitive tasks and handoffs",
+  "White-labeling":          "Add your own logo and brand colours to the product experience",
+};
+
+const cleanFeatures = (rawText) => {
+  return rawText.split("\n").map(line => {
+    const trimmed = line.trim();
+    if (!trimmed) return "";
+    // Check for a match (case-insensitive)
+    const match = Object.keys(LLM_CLEANUP_MAP).find(
+      k => k.toLowerCase() === trimmed.toLowerCase()
+    );
+    return match ? LLM_CLEANUP_MAP[match] : trimmed;
+  }).join("\n");
+};
+
+// Sample product context and mock LLM cleanup for it
+const sampleProductContext = "A B2B SaaS project management tool with Jira/Linear integration, REST API, SSO support, and role-based access control (RBAC). Currently targeting SMB and mid-market segments at $49/seat/month.";
+
+const cleanProductContext = (text) => {
+  if (text.trim() === sampleProductContext.trim()) {
+    return "A work management tool for growing business teams. Connects with the tools your team already uses, gives managers control over who can see and do what, and makes secure sign-in effortless for everyone.";
+  }
+  // In production this would call the LLM — return as-is for any custom input
+  return text;
+};
+
+function App() {
+  const [screen, setScreen] = useState("setup");
+  const [inputText, setInputText] = useState(sampleFeatures.join("\n"));
+  const [productContext, setProductContext] = useState(sampleProductContext);
+  const [features, setFeatures] = useState(sampleFeatures);
+  const [studyName, setStudyName] = useState("Q2 Roadmap Prioritization");
+  const [setIdx, setSetIdx] = useState(0);
+  const [best, setBest] = useState(null);
+  const [worst, setWorst] = useState(null);
+  const [tab, setTab] = useState("priority");
+  const [selectedOutcomes, setSelectedOutcomes] = useState(["priority"]);
+  const [audience, setAudience] = useState("business");
+  const [llmLoading, setLlmLoading] = useState(false);
+  const [llmCleaned, setLlmCleaned] = useState(false);
+  const [activeSets, setActiveSets] = useState(maxDiffSets);
+
+  const handleLlmCleanup = () => {
+    setLlmLoading(true);
+    setLlmCleaned(false);
+    setTimeout(() => {
+      setInputText(cleanFeatures(inputText));
+      setProductContext(cleanProductContext(productContext));
+      setLlmLoading(false);
+      setLlmCleaned(true);
+    }, 1800);
+  };
+
+  const toggleOutcome = (id) => {
+    setSelectedOutcomes(prev =>
+      prev.includes(id) ? (prev.length > 1 ? prev.filter(o => o !== id) : prev) : [...prev, id]
+    );
+  };
+
+  const SCREENS = ["setup", "features", "preview", "results"];
+
+  const SCREEN_LABELS = { setup: "Setup", features: "Features", preview: "Preview", results: "Results" };
+
+  const goTo = (s) => {
+    if (SCREENS.indexOf(s) > SCREENS.indexOf(screen)) return;
+    setScreen(s);
+  };
+
+  // Setup → Features
+  const handleSetupContinue = () => {
+    setLlmCleaned(false);
+    setScreen("features");
+  };
+
+  // Features → Preview
+  const handleBuild = () => {
+    const parsed = inputText.split("\n").map(f => f.trim()).filter(Boolean);
+    const capped = parsed.slice(0, 12);
+    setFeatures(capped);
+    setActiveSets(buildMaxDiffSets(capped));
+    setSetIdx(0); setBest(null); setWorst(null);
+    setTab(selectedOutcomes[0]);
+    setScreen("preview");
+  };
+
+  const handleNext = () => {
+    if (setIdx < activeSets.length - 1) {
+      setSetIdx(setIdx + 1); setBest(null); setWorst(null);
+    } else {
+      setScreen("results");
+    }
+  };
+
+  const toggleBest = (opt) => { if (opt === worst) return; setBest(best === opt ? null : opt); };
+  const toggleWorst = (opt) => { if (opt === best) return; setWorst(worst === opt ? null : opt); };
+
+  const canAdvance = best !== null && worst !== null;
+  const currentSet = activeSets[setIdx] || activeSets[0];
+
+  const stepClass = (s) => {
+    if (screen === s) return "step active";
+    if (SCREENS.indexOf(s) < SCREENS.indexOf(screen)) return "step done";
+    return "step locked";
+  };
+
+  return (
+    <div className="min-h-screen">
+      <header>
+        <div className="logo">
+          <div className="logo-mark">T</div>
+          <div>
+            <span className="logo-name">Temper</span>
+            <div className="logo-tagline">Raw ideas. Refined priorities.</div>
+          </div>
+        </div>
+        <div className="steps">
+          {SCREENS.map((s, i) => (
+            <button key={s} className={stepClass(s)} onClick={() => goTo(s)}>
+              <span className="step-num">{i+1}</span>
+              {SCREEN_LABELS[s] || s}
+            </button>
+          ))}
+        </div>
+        <div style={{width: 80}} />
+      </header>
+
+      <main>
+        <div className="max-w-3xl">
+
+          {/* SETUP */}
+          {screen === "setup" && (
+            <div>
+              <h1>What are you trying to learn?</h1>
+              <p className="subtitle">Tell Temper what decisions you're trying to make, who you're asking, and what's in your backlog.</p>
+
+              <div className="card mb20">
+                <div className="form-group">
+                  <label>Study name</label>
+                  <input value={studyName} onChange={e => setStudyName(e.target.value)} />
+                </div>
+
+                <div className="form-group">
+                  <label>What do you want to measure?</label>
+                  <p className="hint">Each outcome adds ~2 min per respondent and ~12 additional responses to your sample. Select only what you need.</p>
+                  <div className="outcome-grid">
+                    {OUTCOMES.map(o => {
+                      const sel = selectedOutcomes.includes(o.id);
+                      return (
+                        <button key={o.id} className={`outcome-tile ${sel ? "selected" : ""}`} onClick={() => toggleOutcome(o.id)}>
+                          {sel && (
+                            <div className="outcome-check">
+                              <svg viewBox="0 0 10 10"><polyline points="1.5,5 4,7.5 8.5,2.5" /></svg>
+                            </div>
+                          )}
+                          <span className="outcome-tile-icon">{o.icon}</span>
+                          <span className="outcome-tile-label">{o.label}</span>
+                          <span className="outcome-tile-desc">{o.desc}</span>
+                          <span style={{fontSize:10, color: sel ? "#D08050" : "#9E8E88", marginTop:6, display:"block", fontWeight:500}}>+{o.time} min · +{o.cost} responses</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {(() => {
+                    const totalTime = 6 + selectedOutcomes.length * 2;
+                    const totalResp = 100 + selectedOutcomes.length * 12;
+                    const totalCost = Math.round((totalResp * 22) / 50) * 50;
+                    return (
+                      <div style={{marginTop:10, background:"#FAF7F4", border:"1px solid #E5DDD5", borderRadius:8, padding:"8px 12px", fontSize:12, color:"#4A3F3C", display:"flex", gap:16}}>
+                        <span>⏱ <strong>{totalTime} min</strong> per respondent</span>
+                        <span>👥 <strong>~{totalResp}</strong> responses needed</span>
+                        <span>💳 <strong>~${totalCost}</strong> est. panel cost</span>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                <div className="form-group" style={{marginBottom: 0}}>
+                  <label>Who are your customers?</label>
+                  <p className="hint">This shapes how question framing and results are presented.</p>
+                  <div className="audience-row">
+                    {AUDIENCES.map(a => (
+                      <button key={a.id} className={`audience-tile ${audience === a.id ? "selected" : ""}`} onClick={() => setAudience(a.id)}>
+                        <span className="audience-icon">{a.icon}</span>
+                        <div>
+                          <div className="audience-label">{a.label}</div>
+                          <div className="audience-sub">{a.sub}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <button className="btn-primary" onClick={handleSetupContinue}>Next: add your features →</button>
+              <p className="footnote">
+                Study auto-configured for {selectedOutcomes.length} outcome{selectedOutcomes.length > 1 ? "s" : ""} · ~{6 + selectedOutcomes.length * 2} min for respondents · Panel cost estimate based on ~$22/complete via Prolific (B2B targeting)
+              </p>
+            </div>
+          )}
+
+          {/* FEATURES */}
+          {screen === "features" && (
+            <div>
+              <h1>Add your feature list</h1>
+              <p className="subtitle">Paste the features you want to test — one per line. These are the items your customers will rank.</p>
+
+              <div className="card mb20" style={{padding: "16px"}}>
+                <div className="form-group" style={{marginBottom: 0}}>
+                  <label>Product context</label>
+                  <p className="hint">Describe what your product does. The AI uses this to rewrite feature names in language that makes sense to your customers.</p>
+                  <textarea
+                    rows={3}
+                    value={productContext}
+                    onChange={e => { setProductContext(e.target.value); setLlmCleaned(false); }}
+                    className={llmCleaned ? "textarea-cleaned" : ""}
+                    placeholder="e.g. A B2B project management tool for engineering teams…"
+                  />
+                </div>
+              </div>
+
+              <div className="card mb20" style={{padding: "16px"}}>
+                <div className="form-group" style={{marginBottom: 8}}>
+                  <label>Feature list</label>
+                  <p className="hint">5–15 items works best. One feature per line.</p>
+                  <textarea
+                    rows={10}
+                    value={inputText}
+                    onChange={e => { setInputText(e.target.value); setLlmCleaned(false); }}
+                    className={llmCleaned ? "textarea-cleaned" : ""}
+                  />
+                </div>
+                <div className="btn-row" style={{marginBottom: 0}}>
+                  <button className="btn-outline">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                    Connect Jira
+                  </button>
+                  <button className="btn-outline">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
+                    Import CSV
+                  </button>
+                </div>
+              </div>
+
+              <div className="llm-bar">
+                <div className="llm-bar-left">
+                  <span className="llm-bar-title">Make language customer-friendly</span>
+                  <span className="llm-bar-desc">Rewrites jargon in both fields above using your product context as a guide</span>
+                </div>
+                {llmCleaned ? (
+                  <div className="btn-llm-done">
+                    <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7"/></svg>
+                    Cleaned
+                  </div>
+                ) : (
+                  <button className="btn-llm" onClick={handleLlmCleanup} disabled={llmLoading}>
+                    {llmLoading ? (
+                      <><div className="spinner" />Cleaning…</>
+                    ) : (
+                      <>✦ Clean up with AI</>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              <button className="btn-primary" onClick={handleBuild}>Build study →</button>
+              <p className="footnote">
+                {inputText.split("\n").filter(l => l.trim()).length} features · Study auto-configured · ~{6 + selectedOutcomes.length * 2} min for respondents
+              </p>
+            </div>
+          )}
+
+          {/* PREVIEW */}
+          {screen === "preview" && (
+            <div>
+              <div className="mb4" style={{display:"flex", gap:8, flexWrap:"wrap", alignItems:"center"}}>
+                <span className="badge badge-amber">Preview — respondent view</span>
+                {llmCleaned && (
+                  <span className="badge" style={{background:"#FEF3E8", color:"#A85E2A", border:"1px solid #F0C9A4"}}>✦ AI-polished language</span>
+                )}
+              </div>
+              <h1>This is what your customers will see</h1>
+              <p className="subtitle">We've designed the study automatically. Click through a few rounds to get a feel for it.</p>
+              <div className="config-summary">
+                <span className="config-chip">{AUDIENCES.find(a => a.id === audience)?.label}</span>
+                {selectedOutcomes.map(id => (
+                  <span key={id} className="config-chip">{OUTCOMES.find(o => o.id === id)?.label}</span>
+                ))}
+              </div>
+              <div className="card" style={{padding: 0, marginBottom: 16}}>
+                <div className="maxdiff-header">
+                  <span>Round {setIdx + 1} of {activeSets.length}</span>
+                  <div className="dots">
+                    {activeSets.map((_, i) => <div key={i} className={`dot ${i <= setIdx ? "filled" : ""}`} />)}
+                  </div>
+                </div>
+                <div className="maxdiff-body">
+                  {(() => {
+                    // Rotate the outcome being measured each round
+                    const outcomeForRound = selectedOutcomes[setIdx % selectedOutcomes.length];
+                    const stem = OUTCOME_STEMS[outcomeForRound] || OUTCOME_STEMS.priority;
+                    const outcomeLabel = OUTCOMES.find(o => o.id === outcomeForRound)?.label;
+                    return (
+                      <>
+                        <div style={{fontSize:10, fontWeight:600, color:"#9E8E88", textAlign:"center", textTransform:"uppercase", letterSpacing:".06em", marginBottom:6}}>Measuring: {outcomeLabel}</div>
+                        <p className="maxdiff-prompt">
+                          Which of these features would you be <span className="most">most</span> and <span className="least">least</span> {stem.most.replace(/^most /, "")}?
+                        </p>
+                      </>
+                    );
+                  })()}
+                  {currentSet.map(opt => (
+                    <div key={opt} className={`option-row ${best === opt ? "is-best" : ""} ${worst === opt ? "is-worst" : ""}`}>
+                      <span className="option-label">{opt}</span>
+                      <div className="option-btns">
+                        <button
+                          className={`opt-btn most-btn ${best === opt ? "selected-most" : ""}`}
+                          onClick={() => toggleBest(opt)}
+                        >Most</button>
+                        <button
+                          className={`opt-btn least-btn ${worst === opt ? "selected-least" : ""}`}
+                          onClick={() => toggleWorst(opt)}
+                        >Least</button>
+                      </div>
+                    </div>
+                  ))}
+                  <button className="btn-primary" style={{marginTop: 16}} disabled={!canAdvance} onClick={handleNext}>
+                    {setIdx < activeSets.length - 1
+                      ? `Next round — ${OUTCOMES.find(o => o.id === selectedOutcomes[(setIdx + 1) % selectedOutcomes.length])?.label} →`
+                      : "See results →"}
+                  </button>
+                </div>
+              </div>
+              <div className="info-bar">
+                <strong>Auto-configured:</strong> {features.length} features · {Math.round(features.length * 1.5)} rounds per respondent · Balanced incomplete block design
+              </div>
+            </div>
+          )}
+
+          {/* RESULTS */}
+          {screen === "results" && (() => {
+            const resultTabs = [
+              ...selectedOutcomes.map(id => ({
+                id,
+                label: OUTCOMES.find(o => o.id === id)?.label,
+              })),
+              { id: "map", label: "Feature map" },
+            ];
+
+            // Helpers for feature map
+            const shortName = n => n
+              .replace("Single sign-on (SSO)", "SSO")
+              .replace("Workflow automation", "Workflow")
+              .replace("Advanced permissions", "Permissions")
+              .replace("Custom dashboards", "Dashboards")
+              .replace("Bulk data export", "Export")
+              .replace("Slack integration", "Slack")
+              .replace("White-labeling", "White-label")
+              .replace("Audit logs", "Audit")
+              .replace("API access", "API")
+              .replace("Mobile app", "Mobile");
+
+            const scoreFor = (feat, outcomeId) => {
+              const data = OUTCOME_DATA[outcomeId];
+              if (!data) return 50;
+              const item = data.find(d => d.name === feat);
+              return item ? item.score : 50;
+            };
+
+            const allFeatures = (OUTCOME_DATA[selectedOutcomes[0]] || OUTCOME_DATA.priority).map(f => f.name);
+
+            const featureItems = allFeatures.map(name => {
+              const scores = {};
+              selectedOutcomes.forEach(id => { scores[id] = scoreFor(name, id); });
+              const avg = selectedOutcomes.reduce((s, id) => s + scores[id], 0) / selectedOutcomes.length;
+              return { name, scores, avg };
+            });
+
+            const cellStyle = score => score >= 70
+              ? { background: "#d1fae5", color: "#065f46" }
+              : score >= 45
+              ? { background: "#fef3c7", color: "#92400e" }
+              : { background: "#F0EAE4", color: "#9E8E88" };
+
+            const buildFirst  = featureItems.filter(f => f.avg >= 65).sort((a,b) => b.avg - a.avg);
+            const consider    = featureItems.filter(f => f.avg >= 40 && f.avg < 65).sort((a,b) => b.avg - a.avg);
+            const lowPriority = featureItems.filter(f => f.avg < 40).sort((a,b) => b.avg - a.avg);
+
+            // Scatter axes: first two selected outcomes
+            const xId = selectedOutcomes[0];
+            const yId = selectedOutcomes.length > 1 ? selectedOutcomes[1] : selectedOutcomes[0];
+            const sizeId = selectedOutcomes.length > 2 ? selectedOutcomes[2] : null;
+            const xLabel = OUTCOMES.find(o => o.id === xId)?.label || xId;
+            const yLabel = OUTCOMES.find(o => o.id === yId)?.label || yId;
+            const W = 368, H = 260, PAD = 46;
+            const toX = s => PAD + (s / 100) * (W - PAD * 2);
+            const toY = s => (H - PAD) - (s / 100) * (H - PAD * 2);
+            const toR = s => 5 + (s / 100) * 8;
+            const dotFill = avg => avg >= 65 ? "#C4733A" : avg >= 40 ? "#f59e0b" : "#9E8E88";
+
+            return (
+              <div>
+                <div className="results-header">
+                  <div>
+                    <h1>{studyName}</h1>
+                    <p className="results-meta">312 respondents · Completed March 14, 2026 · {AUDIENCES.find(a => a.id === audience)?.label}</p>
+                  </div>
+                  <button className="btn-sm">Export →</button>
+                </div>
+
+                <div className="rec-card">
+                  <div className="rec-label">Top recommendation</div>
+                  <div className="rec-text">{makeRec(tab, audience)}</div>
+                </div>
+
+                <div className="tabs">
+                  {resultTabs.map(t => (
+                    <button key={t.id} className={`tab ${tab === t.id ? "active" : ""}`} onClick={() => setTab(t.id)}>{t.label}</button>
+                  ))}
+                </div>
+
+                {/* Per-outcome ranked list */}
+                {selectedOutcomes.map(outcomeId => tab === outcomeId && (
+                  <div key={outcomeId} className="list-card">
+                    <div className="list-subheader" style={{display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+                      <span>{OUTCOME_SCORE_LABEL[outcomeId] || "Score out of 100"}</span>
+                      {llmCleaned && <span style={{fontSize:10, color:"#C4733A", fontWeight:600}}>✦ hover name to see tested language</span>}
+                    </div>
+                    {(OUTCOME_DATA[outcomeId] || OUTCOME_DATA.priority).map((item, i) => {
+                      const colors = OUTCOME_BAR_COLOR[outcomeId] || OUTCOME_BAR_COLOR.priority;
+                      const barColor = i < 3 ? colors.high : i < 6 ? colors.mid : colors.low;
+                      const testedLang = LLM_CLEANUP_MAP[item.name];
+                      return (
+                        <div key={item.name} className="list-row">
+                          <span className="rank">{i+1}</span>
+                          <span className="feat-name" style={{overflow:"visible"}}>
+                            {llmCleaned && testedLang ? (
+                              <span className="feat-tested">
+                                {item.name}
+                                <span className="feat-tested-icon">✦</span>
+                                <span className="feat-tested-tip">
+                                  <strong>Respondents saw</strong>
+                                  "{testedLang}"
+                                </span>
+                              </span>
+                            ) : item.name}
+                          </span>
+                          <div className="bar-wrap">
+                            <div className="bar-bg">
+                              <div className="bar-fill" style={{width: `${item.score}%`, background: barColor}} />
+                            </div>
+                            <span className="score">{item.score}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+
+                {/* Feature Map — scatter + heatmap */}
+                {tab === "map" && (
+                  <div>
+                    {/* Scatter plot */}
+                    <div className="card" style={{marginBottom: 16, padding: "16px 16px 10px"}}>
+                      <div style={{fontSize:12, fontWeight:600, color:"#6B5E5A", marginBottom:8}}>
+                        Feature positioning — {xLabel} vs {yLabel}
+                        {sizeId && <span style={{fontWeight:400, color:"#9E8E88"}}> · dot size = {OUTCOMES.find(o=>o.id===sizeId)?.label}</span>}
+                      </div>
+                      <svg width={W} height={H} style={{overflow:"visible", display:"block"}}>
+                        {/* "Build first" quadrant highlight */}
+                        <rect x={toX(50)} y={PAD} width={W-PAD-toX(50)} height={toY(50)-PAD} fill="#f0fdf4" opacity={0.7} rx={4}/>
+                        <text x={W-PAD-6} y={PAD+13} textAnchor="end" fontSize={9} fill="#86efac" fontWeight={700}>Build first</text>
+                        {/* Grid */}
+                        {[25,50,75].map(v => (
+                          <g key={v}>
+                            <line x1={toX(v)} y1={PAD} x2={toX(v)} y2={H-PAD} stroke="#E5DDD5" strokeWidth={1} strokeDasharray="3,3"/>
+                            <line x1={PAD} y1={toY(v)} x2={W-PAD} y2={toY(v)} stroke="#E5DDD5" strokeWidth={1} strokeDasharray="3,3"/>
+                          </g>
+                        ))}
+                        {/* Axes */}
+                        <line x1={PAD} y1={H-PAD} x2={W-PAD} y2={H-PAD} stroke="#C8BEBE" strokeWidth={1.5}/>
+                        <line x1={PAD} y1={PAD} x2={PAD} y2={H-PAD} stroke="#C8BEBE" strokeWidth={1.5}/>
+                        {/* Axis labels */}
+                        <text x={W/2} y={H-4} textAnchor="middle" fontSize={10} fill="#9E8E88">{xLabel} →</text>
+                        <text x={10} y={H/2} textAnchor="middle" fontSize={10} fill="#9E8E88" transform={`rotate(-90,10,${H/2})`}>{yLabel} →</text>
+                        {/* Data points */}
+                        {featureItems.map(item => {
+                          const x = toX(item.scores[xId] || 50);
+                          const y = toY(item.scores[yId] || item.scores[xId] || 50);
+                          const r = toR(sizeId ? (item.scores[sizeId] || 50) : item.avg);
+                          const fill = dotFill(item.avg);
+                          const lbl = shortName(item.name);
+                          const labelAbove = (item.scores[yId] || item.scores[xId] || 50) > 55;
+                          return (
+                            <g key={item.name}>
+                              <circle cx={x} cy={y} r={r} fill={fill} opacity={0.85} stroke="white" strokeWidth={1.5}/>
+                              <text x={x} y={labelAbove ? y - r - 4 : y + r + 10} textAnchor="middle" fontSize={9} fill="#4A3F3C">{lbl}</text>
+                            </g>
+                          );
+                        })}
+                      </svg>
+                      <div style={{display:"flex", gap:14, marginTop:6, flexWrap:"wrap"}}>
+                        {[{c:"#C4733A",l:"Strong across dimensions"},{c:"#f59e0b",l:"Selective appeal"},{c:"#9E8E88",l:"Low priority"}].map(({c,l}) => (
+                          <div key={l} style={{display:"flex", alignItems:"center", gap:5, fontSize:10, color:"#6B5E5A"}}>
+                            <div style={{width:8, height:8, borderRadius:"50%", background:c, flexShrink:0}}/>
+                            {l}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Heatmap table */}
+                    <div className="list-card">
+                      <div className="list-subheader" style={{display:"flex", alignItems:"center", gap:4, padding:"10px 16px"}}>
+                        <span style={{flex:"0 0 140px"}}>Feature</span>
+                        {selectedOutcomes.map(id => (
+                          <span key={id} style={{flex:1, textAlign:"center", fontSize:10}}>{OUTCOMES.find(o=>o.id===id)?.label}</span>
+                        ))}
+                        <span style={{width:40, textAlign:"center", fontSize:10}}>Avg</span>
+                      </div>
+                      {[
+                        {label:"Build first", color:"#C4733A", items: buildFirst},
+                        {label:"Consider",    color:"#f59e0b", items: consider},
+                        {label:"Low priority",color:"#9E8E88", items: lowPriority},
+                      ].map(group => group.items.length > 0 && (
+                        <React.Fragment key={group.label}>
+                          <div style={{padding:"5px 16px", background:"#FAF7F4", borderTop:"1px solid #F0EAE4", display:"flex", alignItems:"center", gap:6}}>
+                            <div style={{width:7, height:7, borderRadius:"50%", background:group.color}}/>
+                            <span style={{fontSize:10, fontWeight:700, color:"#9E8E88", textTransform:"uppercase", letterSpacing:".05em"}}>{group.label}</span>
+                          </div>
+                          {group.items.map(item => {
+                            const testedLang = LLM_CLEANUP_MAP[item.name];
+                            return (
+                            <div key={item.name} style={{padding:"8px 16px", display:"flex", alignItems:"center", gap:4, borderBottom:"1px solid #FAF7F4"}}>
+                              <span style={{flex:"0 0 140px", fontSize:13, fontWeight:500, color:"#1E1E1E"}}>
+                                {llmCleaned && testedLang ? (
+                                  <span className="feat-tested">
+                                    {shortName(item.name)}
+                                    <span className="feat-tested-icon">✦</span>
+                                    <span className="feat-tested-tip">
+                                      <strong>Respondents saw</strong>
+                                      "{testedLang}"
+                                    </span>
+                                  </span>
+                                ) : shortName(item.name)}
+                              </span>
+                              {selectedOutcomes.map(id => {
+                                const s = item.scores[id] || 0;
+                                const cs = cellStyle(s);
+                                return (
+                                  <div key={id} style={{flex:1, display:"flex", justifyContent:"center"}}>
+                                    <span style={{...cs, padding:"2px 8px", borderRadius:9999, fontSize:11, fontWeight:600, minWidth:30, textAlign:"center"}}>{s}</span>
+                                  </div>
+                                );
+                              })}
+                              <span style={{width:40, textAlign:"center", fontSize:12, fontWeight:700, color:"#1E1E1E"}}>{Math.round(item.avg)}</span>
+                            </div>
+                          ); })}
+                        </React.Fragment>
+                      ))}
+                      <div className="list-footer">Scores out of 100 · Color: green ≥ 70, amber ≥ 45, gray &lt; 45 · Avg across all measured dimensions</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
+        </div>
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
