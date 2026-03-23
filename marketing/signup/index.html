@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temper — Raw Ideas, Refined Priorities</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+
+    <!-- Header / Hero -->
+    <header class="hero">
+      <nav class="nav">
+        <div class="brand">
+          <div class="brand-logo">T</div>
+          <span class="brand-name">Temper</span>
+        </div>
+        <a class="nav-contact" href="mailto:michael.r.vasseur@gmail.com">Contact us</a>
+      </nav>
+      <div class="hero-content">
+        <h1>Raw Ideas,<br>Refined Priorities.</h1>
+        <p class="hero-sub">Upload your backlog, get a rigorous, ranked, customer assessed list — ready to act.</p>
+      </div>
+    </header>
+
+    <!-- Product preview -->
+    <section class="preview">
+      <div class="section-header">
+        <p class="section-label">How it works</p>
+        <a class="section-demo" href="../../prototype/index.html" target="_blank">See a demo →</a>
+      </div>
+      <div class="screens">
+
+        <div class="screen-card">
+          <div class="screen-img" onclick="openLightbox('images/setup.png', 'Setup')">
+            <img src="images/setup.png" alt="Setup screen">
+          </div>
+          <div class="screen-meta">
+            <span class="screen-step">01</span>
+            <div>
+              <div class="screen-title">Setup</div>
+              <div class="screen-desc">Connect your team context and scoring criteria.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="screen-card">
+          <div class="screen-img" onclick="openLightbox('images/features.png', 'Features')">
+            <img src="images/features.png" alt="Features screen">
+          </div>
+          <div class="screen-meta">
+            <span class="screen-step">02</span>
+            <div>
+              <div class="screen-title">Features</div>
+              <div class="screen-desc">Paste ideas, upload a CSV, or drop in raw notes.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="screen-card">
+          <div class="screen-img" onclick="openLightbox('images/preview.png', 'Preview')">
+            <img src="images/preview.png" alt="Preview screen">
+          </div>
+          <div class="screen-meta">
+            <span class="screen-step">03</span>
+            <div>
+              <div class="screen-title">Preview</div>
+              <div class="screen-desc">See how Temper scores and reasons through each idea.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="screen-card">
+          <div class="screen-img" onclick="openLightbox('images/results.png', 'Results')">
+            <img src="images/results.png" alt="Results screen">
+          </div>
+          <div class="screen-meta">
+            <span class="screen-step">04</span>
+            <div>
+              <div class="screen-title">Results</div>
+              <div class="screen-desc">Get a ranked list with rationale you can share immediately.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Waitlist -->
+    <div class="waitlist-section">
+      <form class="waitlist-form" id="waitlist-form">
+        <input type="email" name="email" placeholder="your@email.com" required>
+        <button type="submit">Join the waitlist</button>
+      </form>
+      <p class="waitlist-note" id="waitlist-note">No spam, we'll reach out when the beta is ready.</p>
+    </div>
+
+    <script>
+      const form = document.getElementById('waitlist-form');
+      const note = document.getElementById('waitlist-note');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = form.querySelector('button');
+        btn.textContent = 'Submitting…';
+        btn.disabled = true;
+
+        try {
+          const res = await fetch('https://formspree.io/f/mlgpqbjv', {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+            body: new FormData(form),
+          });
+
+          if (res.ok) {
+            form.innerHTML = '<p class="waitlist-success">You\'re on the list. We\'ll be in touch.</p>';
+            note.style.display = 'none';
+          } else {
+            btn.textContent = 'Join the waitlist';
+            btn.disabled = false;
+            note.textContent = 'Something went wrong — please try again.';
+            note.style.color = '#e05a3a';
+          }
+        } catch {
+          btn.textContent = 'Join the waitlist';
+          btn.disabled = false;
+          note.textContent = 'Something went wrong — please try again.';
+          note.style.color = '#e05a3a';
+        }
+      });
+    </script>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+      <img class="lightbox-img" id="lightbox-img" src="" alt="">
+    </div>
+
+    <script>
+      function openLightbox(src, alt) {
+        const lb = document.getElementById('lightbox');
+        const img = document.getElementById('lightbox-img');
+        img.src = src;
+        img.alt = alt;
+        lb.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('active');
+        document.body.style.overflow = '';
+      }
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+    </script>
+
+  </body>
+</html>
