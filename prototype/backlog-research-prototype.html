@@ -189,7 +189,7 @@
     .outcome-check svg { width: 9px; height: 9px; stroke: white; stroke-width: 3; fill: none; }
 
     /* Audience selector */
-    .audience-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+    .audience-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px; }
     .audience-tile { border: 2px solid #E5DDD5; border-radius: 10px; padding: 12px 14px; cursor: pointer; transition: all .15s; background: white; display: flex; align-items: center; gap: 10px; }
     .audience-tile:hover { border-color: #E8B48A; background: #FDF8F5; }
     .audience-tile.selected { border-color: #C4733A; background: #FDF4EC; }
@@ -243,6 +243,9 @@
 <div class="proto-banner">
   This is a prototype — not a real product. Interactions are simulated for research purposes.
   Questions or feedback? <a href="mailto:michael.r.vasseur@gmail.com">michael.r.vasseur@gmail.com</a>
+</div>
+<div class="proto-banner" style="background:#3A2A1E; border-top: 1px solid #4A3A2E;">
+  Interested in early access? <a href="https://michaelrvasseur-spec.github.io/temper/marketing/signup/">Join the waitlist →</a>
 </div>
 
 <div id="root"></div>
@@ -420,6 +423,7 @@ const OUTCOME_STEMS = {
 const AUDIENCES = [
   { id: "consumer", icon: "👤", label: "Consumers",      sub: "Individual users, B2C" },
   { id: "business", icon: "🏢", label: "Businesses",     sub: "Teams and companies, B2B" },
+  { id: "byo",      icon: "🔗", label: "Bring your own", sub: "Generate a study link" },
 ];
 
 // Mock LLM cleanup — rewrites jargon into customer-friendly language, normalised length
@@ -595,7 +599,7 @@ function App() {
                       );
                     })}
                   </div>
-                  {(() => {
+                  {audience !== "byo" && (() => {
                     const totalTime = 6 + selectedOutcomes.length * 2;
                     const totalResp = 100 + selectedOutcomes.length * 12;
                     const totalCost = Math.round((totalResp * 22) / 50) * 50;
